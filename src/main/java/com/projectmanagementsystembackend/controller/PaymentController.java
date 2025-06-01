@@ -7,6 +7,7 @@ import com.projectmanagementsystembackend.vo.PaymentLinkResponse;
 import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import jakarta.annotation.PostConstruct;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -28,6 +29,12 @@ public class PaymentController {
     private String apiSecret;
     @Autowired
     private UserService userService;
+
+    @PostConstruct
+    public void PrintValues(){
+        logger.info("Razorpay API Key: {}", apiKey);
+        logger.info("Razorpay API Secret: {}", apiSecret);
+    }
 
     @PostMapping("/{planType}")
     public ResponseEntity<PaymentLinkResponse> createPaymentLink(@PathVariable(value = "planType") PlanType planType,
