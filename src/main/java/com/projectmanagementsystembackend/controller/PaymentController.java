@@ -8,6 +8,7 @@ import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import jakarta.annotation.PostConstruct;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -27,6 +28,10 @@ public class PaymentController {
     private String apiKey;
     @Value("${razorpay.api.secret}")
     private String apiSecret;
+    @Value("${razorpay.amount.paise:79900}")
+    private int amount_Paise;
+    @Value("${razorpay.callback.url:http://localhost:5173/upgrade_plan/success}")
+    private String callbackUrl;
     @Autowired
     private UserService userService;
 
@@ -41,7 +46,7 @@ public class PaymentController {
                                                                  @RequestHeader("Authorization") String token) throws Exception {
 
         User user = userService.findUserProfileByJwt(token);
-        int amount = 799*100;
+        int amount = amount_Paise;
 
         if (planType.equals(PlanType.ANNUALLY)){
             amount = amount * 12;
@@ -49,20 +54,7 @@ public class PaymentController {
 
         try {
             RazorpayClient razorpayClient = new RazorpayClient(apiKey,apiSecret);
-            JSONObject paymentLinkRequest = new JSONObject();
-            paymentLinkRequest.put("amount",amount);
-            paymentLinkRequest.put("currency","INR");
-
-            JSONObject customer = new JSONObject();
-            customer.put("name",user.getFullName());
-            customer.put("email",user.getEmail());
-            paymentLinkRequest.put("customer",customer);
-
-            JSONObject notify = new JSONObject();
-            notify.put("email",true);
-            paymentLinkRequest.put("notify",notify);
-
-            paymentLinkRequest.put("callback_url","http://localhost:5173/upgrade_plan/success");
+            JSONObject paymentLinkRequest = getJsonObject(amount, user);
 
             PaymentLink paymentLink = razorpayClient.paymentLink.create(paymentLinkRequest);
 
@@ -76,11 +68,30 @@ public class PaymentController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (RazorpayException e) {
-            logger.info("Error in payment processing :"+e.getMessage());
+            logger.info("Error in payment processing {} :",e.getMessage());
             throw new RuntimeException(e);
         } catch (JSONException e) {
-            logger.info("Error in payment processing :"+e.getMessage());
+            logger.info("Error in request processing {} :",e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    @NotNull
+    private JSONObject getJsonObject(int amount, User user) {
+        JSONObject paymentLinkRequest = new JSONObject();
+        paymentLinkRequest.put("amount", amount);
+        paymentLinkRequest.put("currency","INR");
+
+        JSONObject customer = new JSONObject();
+        customer.put("name", user.getFullName());
+        customer.put("email", user.getEmail());
+        paymentLinkRequest.put("customer",customer);
+
+        JSONObject notify = new JSONObject();
+        notify.put("email",true);
+        paymentLinkRequest.put("notify",notify);
+
+        paymentLinkRequest.put("callback_url",callbackUrl);
+        return paymentLinkRequest;
     }
 }

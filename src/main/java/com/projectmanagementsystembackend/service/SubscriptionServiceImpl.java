@@ -20,7 +20,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         Subscription subscription = new Subscription();
         subscription.setUser(user);
         subscription.setSubscriptionStartDate(LocalDate.now());
-        subscription.setSubscriptionEndDate(LocalDate.now().plusMonths(12));
+        subscription.setSubscriptionEndDate(LocalDate.now().plusDays(15));
         subscription.setValid(true);
         subscription.setPlanType(PlanType.FREE);
 
@@ -30,9 +30,9 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     @Override
     public Subscription getUserSubscription(Long userId) throws Exception {
         Subscription subscription = subscriptionRepository.findByUserId(userId);
-        if (subscription.isValid()){
+        if (!isValid(subscription)){
             subscription.setPlanType(PlanType.FREE);
-            subscription.setSubscriptionEndDate(LocalDate.now().plusMonths(12));
+            subscription.setSubscriptionEndDate(LocalDate.now().plusDays(15));
             subscription.setSubscriptionStartDate(LocalDate.now());
         }
         return subscription;
@@ -53,9 +53,9 @@ public class SubscriptionServiceImpl implements SubscriptionService{
 
     @Override
     public boolean isValid(Subscription subscription) {
-        if (subscription.getPlanType().equals(PlanType.FREE)){
-            return true;
-        }
+//        if (subscription.getPlanType().equals(PlanType.FREE)){
+//            return true;
+//        }
         LocalDate endDate = subscription.getSubscriptionEndDate();
         LocalDate now = LocalDate.now();
         return endDate.isAfter(now) || endDate.isEqual(now);
