@@ -58,6 +58,7 @@ public class OtpServiceImpl implements OtpService {
         } else {
             details.failedAttempts++;
             if (details.failedAttempts >= MAX_ATTEMPTS) {
+                //remove OTP after max attempts to prevent brute force attacks
                 otpStorage.remove(email);
             }
             return false;
