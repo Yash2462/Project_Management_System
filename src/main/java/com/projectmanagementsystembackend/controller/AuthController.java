@@ -10,6 +10,7 @@ import com.projectmanagementsystembackend.service.EmailService;
 import com.projectmanagementsystembackend.service.OtpService;
 import com.projectmanagementsystembackend.service.SubscriptionService;
 import com.projectmanagementsystembackend.vo.AuthResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -74,6 +76,7 @@ public class AuthController {
     public ResponseEntity<Object> sendOtp(@PathVariable(value = "email") String email) {
         AuthResponse authResponse = new AuthResponse();
         try {
+            log.info("otp request received for email: {}", email);
             String otp = otpService.generateOtp(email);
             emailService.sendOtp(email, otp);
             authResponse.setMessage("OTP sent successfully");
@@ -124,15 +127,17 @@ public class AuthController {
             authResponse.setJwt(jwt);
             authResponse.setMessage("User Logged in successfully");
             authResponse.setStatus(200);
-
+            log.info("User logged in successfully: {}", username);
             return new ResponseEntity<>(authResponse, HttpStatus.OK);
         } catch (BadCredentialsException e) {
             authResponse.setMessage("Invalid credentials: " + e.getMessage());
             authResponse.setStatus(401);
+            log.info("Login failed for user: {}. Reason: {}", loginRequest.getEmail(), e.getMessage());
             return new ResponseEntity<>(authResponse, HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             authResponse.setMessage("Login failed: " + e.getMessage());
             authResponse.setStatus(500);
+            log.error("Login failed for user: {}. Reason: {}", loginRequest.getEmail(), e.getMessage());
             return new ResponseEntity<>(authResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 
         }

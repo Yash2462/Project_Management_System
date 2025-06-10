@@ -1,5 +1,6 @@
 package com.projectmanagementsystembackend.exception;
 
+import com.projectmanagementsystembackend.model.Project;
 import com.projectmanagementsystembackend.vo.ResponseMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,4 +17,30 @@ public class GlobalExceptionHandler {
         message.setStatus(429);
         return new ResponseEntity<>(message,HttpStatus.TOO_MANY_REQUESTS);
     }
+
+    @ExceptionHandler(ChatNotFound.class)
+    public ResponseEntity<Object> handleRateLimitExceeded(ChatNotFound ex) {
+        ResponseMessage message = new ResponseMessage();
+        message.setMessage(ex.getMessage());
+        message.setStatus(404);
+        return new ResponseEntity<>(message,HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<Object> handleRateLimitExceeded(ProjectNotFoundException ex) {
+        ResponseMessage message = new ResponseMessage();
+        message.setMessage(ex.getMessage());
+        message.setStatus(404);
+        return new ResponseEntity<>(message,HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleRateLimitExceeded(UserNotFoundException ex) {
+        ResponseMessage message = new ResponseMessage();
+        message.setMessage(ex.getMessage());
+        message.setStatus(404);
+        return new ResponseEntity<>(message,HttpStatus.NOT_FOUND);
+    }
+
+
 }
