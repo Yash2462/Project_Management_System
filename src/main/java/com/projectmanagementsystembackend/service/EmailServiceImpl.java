@@ -25,25 +25,29 @@ public class EmailServiceImpl implements EmailService{
     private TemplateEngine templateEngine;
     @Override
     public void sendEmailWithToken(String userEmail, String link) throws Exception {
+        // Prepare the context for the template
+        Context context = new Context();
+        context.setVariable("invitationLink", link);
+
+        // Process the template into a String
+        String htmlContent = templateEngine.process("invitation-template", context);
+
+        // Create and send the email
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
-
-        String subject = "Join project team Invitation";
-        String text = "Click the link to join project team"+link;
-
-        mimeMessageHelper.setSubject(subject);
-        mimeMessageHelper.setText(text,true);
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
         mimeMessageHelper.setTo(userEmail);
+        //future case we can add project name in subject with overview of project
+        mimeMessageHelper.setSubject("Invitation to Join Project");
+        mimeMessageHelper.setText(htmlContent, true); // true = isHtml
 
         try {
             javaMailSender.send(mimeMessageHelper.getMimeMessage());
-            logger.info("Successfully send the email");
-        }catch (Exception e){
-            logger.info("Exception in mail sending : "+e.getMessage());
+            logger.info("Successfully sent the email");
+        } catch (Exception e) {
+            logger.info("Exception in mail sending: " + e.getMessage());
             throw new Exception("Error in sending email");
         }
     }
-
     @Override
     public void sendOtp(String userEmail, String otp) throws MessagingException {
         // Prepare the context for the template
@@ -57,7 +61,7 @@ public class EmailServiceImpl implements EmailService{
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(userEmail);
-        helper.setSubject("Your OTP Code");
+        helper.setSubject("OTPForLogin -"+ otp);
         helper.setText(htmlContent, true); // true = isHtml
 
         javaMailSender.send(message);
