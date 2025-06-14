@@ -1,9 +1,14 @@
 package com.projectmanagementsystembackend.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Random;
@@ -17,7 +22,7 @@ public class OtpServiceImpl implements OtpService {
     private static final int OTP_CLEANUP_THRESHOLD_MINUTES = 60; // 1 hour
     private static final int MAX_ATTEMPTS = 3;
 
-    private static class OtpDetails {
+    private static class OtpDetails implements Serializable {
         String otp;
         LocalDateTime timestamp;
         int failedAttempts;
@@ -30,7 +35,15 @@ public class OtpServiceImpl implements OtpService {
     }
 
     // Use thread-safe ConcurrentHashMap
-    private static final Map<String, OtpDetails> otpStorage = new ConcurrentHashMap<>();
+    @Autowired
+    private RedissonClient redissonClient;
+    //private static final Map<String, OtpDetails> otpStorage = new ConcurrentHashMap<>();
+    // Use Redisson's RMap for distributed storage when application restarts it persists the data in Redis
+    RMap<String, OtpDetails> otpStorage ;
+    @PostConstruct
+    public void init() {
+        otpStorage = redissonClient.getMap("otpStorage");
+    }
     private final Random random = new Random();
 
     @Override
