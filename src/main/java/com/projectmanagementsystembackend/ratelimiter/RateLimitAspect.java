@@ -26,7 +26,11 @@ public class RateLimitAspect {
 
     @Around("@annotation(rateLimit)")
     public Object rateLimit(ProceedingJoinPoint joinPoint, RateLimit rateLimit) throws Throwable {
-        String key = "rate_limit:" + request.getRemoteAddr() + ":" + joinPoint.getSignature().toShortString();
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        String clientIp = (forwardedFor != null && !forwardedFor.isEmpty())
+                ? forwardedFor.split(",")[0].trim()
+                : request.getRemoteAddr();
+        String key = "rate_limit:" + clientIp + ":" + joinPoint.getSignature().toShortString();
         RRateLimiter limiter = redissonClient.getRateLimiter(key);
         limiter.trySetRate(
                 RateType.OVERALL,
