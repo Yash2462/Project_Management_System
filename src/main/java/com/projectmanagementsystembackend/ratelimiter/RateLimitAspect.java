@@ -35,7 +35,7 @@ public class RateLimitAspect {
         );
 
         if (!limiter.tryAcquire()) {
-            throw new RateLimitExceededException("Max request limit reached. Please try again later.");
+            throw new RateLimitExceededException("MAX_LIMIT_EXCEEDED");
         }
         return joinPoint.proceed();
     }

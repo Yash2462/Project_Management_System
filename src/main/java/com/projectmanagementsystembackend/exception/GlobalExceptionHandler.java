@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RateLimitExceededException.class)
     public ResponseEntity<Object> handleRateLimitExceeded(RateLimitExceededException ex) {
         ResponseMessage message = new ResponseMessage();
-        message.setMessage("MAX_LIMIT_EXCEEDED");
+        message.setMessage(ex.getMessage());
         message.setStatus(429);
         return new ResponseEntity<>(message,HttpStatus.TOO_MANY_REQUESTS);
     }

@@ -2,6 +2,7 @@ package com.projectmanagementsystembackend.controller;
 
 import com.projectmanagementsystembackend.config.JwtProvider;
 import com.projectmanagementsystembackend.model.User;
+import com.projectmanagementsystembackend.ratelimiter.EmailRateLimit;
 import com.projectmanagementsystembackend.ratelimiter.RateLimit;
 import com.projectmanagementsystembackend.repository.UserRepository;
 import com.projectmanagementsystembackend.request.LoginRequest;
@@ -72,6 +73,7 @@ public class AuthController {
     }
 
     @RateLimit(permits = 5,durationSeconds = 60)
+    @EmailRateLimit(permits = 5, durationSeconds = 60)
     @PostMapping("/send-otp/{email}")
     public ResponseEntity<Object> sendOtp(@PathVariable(value = "email") String email) {
         AuthResponse authResponse = new AuthResponse();
