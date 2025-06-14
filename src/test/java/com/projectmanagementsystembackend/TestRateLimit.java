@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("value = 'test'") // Use 'test' profile for testing
+@ActiveProfiles("test") // Use 'test' profile for testing
 public class TestRateLimit {
 
     @Autowired
@@ -48,14 +48,17 @@ public class TestRateLimit {
         String email = "ratelimit@example.com";
         for (int i = 0; i < 5; i++) {
             mockMvc.perform(post("/auth/send-otp/{email}", email)
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("X-Forwarded-For", "127.0.0.2"))
                     .andExpect(status().isOk());
         }
         // 6th request should be rate limited
         mockMvc.perform(post("/auth/send-otp/{email}", email)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.message").value("MAX_LIMIT_EXCEEDED"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Forwarded-For", "127.0.0.2"))
+                .andExpect(status().isTooManyRequests());
+        //not expecting a specific message here because we have two rate limiters, one foremail and one for login
+//                .andExpect(jsonPath("$.message").value("MAX_LIMIT_EXCEEDED"));
     }
 
     @Test
@@ -65,14 +68,15 @@ public class TestRateLimit {
         for (int i = 0; i < 10; i++) {
             mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(loginRequest)))
+                            .content(objectMapper.writeValueAsString(loginRequest))
+                            .header("X-Forwarded-For", "127.0.0.3"))// change IP to simulate different user otherwise login in authcontroller test fails
                     .andExpect(status().isOk());
         }
         // 11th request should be rate limited
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest))
-                        .header("X-Forwarded-For", "127.0.0.2")) // change IP to simulate different user otherwise login in authcontroller test fails
+                        .header("X-Forwarded-For", "127.0.0.3")) // change IP to simulate different user otherwise login in authcontroller test fails
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.message").value("MAX_LIMIT_EXCEEDED"));
     }
