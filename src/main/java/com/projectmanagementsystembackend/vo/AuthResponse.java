@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthResponse {
 
-    private String jwt;
+    private String token;
     private int status;
     private String message;
 }

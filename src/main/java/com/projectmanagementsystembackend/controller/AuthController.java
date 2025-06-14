@@ -66,7 +66,7 @@ public class AuthController {
         AuthResponse authResponse = new AuthResponse();
         authResponse.setMessage("User Saved Successfully");
         authResponse.setStatus(201);
-        authResponse.setJwt(jwt);
+        authResponse.setToken(jwt);
 
         return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
@@ -97,12 +97,14 @@ public class AuthController {
             String username = loginRequest.getEmail();
             String password = loginRequest.getPassword();
             String otp = loginRequest.getOtp();
-            UserDetails userDetails = customUserDetails.loadUserByUsername(username);
-            if (userDetails == null) {
+            User user = userRepository.findByEmail(username);
+            if (user == null) {
                 authResponse.setMessage("User not found");
                 authResponse.setStatus(404);
                 return new ResponseEntity<>(authResponse, HttpStatus.NOT_FOUND);
             }
+            //find userDetails if user exists
+            UserDetails userDetails = customUserDetails.loadUserByUsername(username);
             Authentication authentication;
             // Check if OTP is provided
             if (otp != null && !otp.isEmpty()) {
@@ -124,7 +126,7 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String jwt = JwtProvider.generateToken(authentication);
-            authResponse.setJwt(jwt);
+            authResponse.setToken(jwt);
             authResponse.setMessage("User Logged in successfully");
             authResponse.setStatus(200);
             log.info("User logged in successfully: {}", username);
