@@ -11,6 +11,7 @@ import com.projectmanagementsystembackend.service.EmailService;
 import com.projectmanagementsystembackend.service.OtpService;
 import com.projectmanagementsystembackend.service.SubscriptionService;
 import com.projectmanagementsystembackend.vo.AuthResponse;
+import com.projectmanagementsystembackend.vo.ResponseMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,31 +46,35 @@ public class AuthController {
     // signup api
     @PostMapping("/signup")
     public ResponseEntity<Object> createUserHandler(@RequestBody User user) throws Exception {
+        try {
+            User isExist = userRepository.findByEmail(user.getEmail());
 
-        User isExist = userRepository.findByEmail(user.getEmail());
+            if (isExist != null){
+                throw new Exception("email already exist with another Account");
+            }
+            User createUser = new User();
+            createUser.setEmail(user.getEmail());
+            createUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            createUser.setFullName(user.getFullName());
 
-        if (isExist != null){
-            throw new Exception("email already exist with another Account");
+            User savedUser = userRepository.save(createUser);
+
+            subscriptionService.createSubscription(savedUser);
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(),user.getPassword());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt = JwtProvider.generateToken(authentication);
+            AuthResponse authResponse = new AuthResponse();
+            authResponse.setMessage("User Saved Successfully");
+            authResponse.setStatus(201);
+            authResponse.setToken(jwt);
+
+            return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ResponseMessage.getServerError(e), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        User createUser = new User();
-        createUser.setEmail(user.getEmail());
-        createUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        createUser.setFullName(user.getFullName());
 
-        User savedUser = userRepository.save(createUser);
-
-        subscriptionService.createSubscription(savedUser);
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(),user.getPassword());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        String jwt = JwtProvider.generateToken(authentication);
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setMessage("User Saved Successfully");
-        authResponse.setStatus(201);
-        authResponse.setToken(jwt);
-
-        return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
 
     @RateLimit(permits = 5,durationSeconds = 60)
@@ -81,9 +86,7 @@ public class AuthController {
             log.info("otp request received for email: {}", email);
             String otp = otpService.generateOtp(email);
             //emailService.sendOtp(email, otp);
-            authResponse.setMessage("OTP sent successfully");
-            authResponse.setStatus(200);
-            return new ResponseEntity<>(authResponse, HttpStatus.OK);
+            return new ResponseEntity<>(ResponseMessage.Generic.OTP_SENT, HttpStatus.OK);
         } catch (Exception e) {
             authResponse.setMessage("Failed to send OTP: " + e.getMessage());
             authResponse.setStatus(500);
