@@ -73,7 +73,9 @@ public class AuthControllerTest {
         String email = "test@example.com";
 
         // 1. Send OTP
-        mockMvc.perform(post("/auth/send-otp/{email}", email))
+        mockMvc.perform(post("/auth/send-otp")
+                        .param("email", email)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("OTP sent successfully"));
 

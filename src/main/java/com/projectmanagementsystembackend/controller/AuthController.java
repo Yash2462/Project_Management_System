@@ -74,13 +74,13 @@ public class AuthController {
 
     @RateLimit(permits = 5,durationSeconds = 60)
     @EmailRateLimit(permits = 5, durationSeconds = 60)
-    @PostMapping("/send-otp/{email}")
-    public ResponseEntity<Object> sendOtp(@PathVariable(value = "email") String email) {
+    @PostMapping("/send-otp")
+    public ResponseEntity<Object> sendOtp(@RequestParam(value = "email") String email) {
         AuthResponse authResponse = new AuthResponse();
         try {
             log.info("otp request received for email: {}", email);
             String otp = otpService.generateOtp(email);
-            emailService.sendOtp(email, otp);
+            //emailService.sendOtp(email, otp);
             authResponse.setMessage("OTP sent successfully");
             authResponse.setStatus(200);
             return new ResponseEntity<>(authResponse, HttpStatus.OK);

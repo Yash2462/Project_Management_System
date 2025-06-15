@@ -47,13 +47,15 @@ public class TestRateLimit {
     void testSendOtpRateLimit() throws Exception {
         String email = "ratelimit@example.com";
         for (int i = 0; i < 5; i++) {
-            mockMvc.perform(post("/auth/send-otp/{email}", email)
+            mockMvc.perform(post("/auth/send-otp")
+                            .param("email", email)
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("X-Forwarded-For", "127.0.0.2"))
                     .andExpect(status().isOk());
         }
         // 6th request should be rate limited
-        mockMvc.perform(post("/auth/send-otp/{email}", email)
+        mockMvc.perform(post("/auth/send-otp")
+                        .param("email", email)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Forwarded-For", "127.0.0.2"))
                 .andExpect(status().isTooManyRequests());
