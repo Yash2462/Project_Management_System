@@ -7,4 +7,6 @@ public interface EmailService {
     void sendEmailWithToken(String userEmail,String link) throws Exception;
 
     void sendOtp(String userEmail, String otp) throws MessagingException;
+
+    void sendWelcomeEmail(String email, String fullName);
 }

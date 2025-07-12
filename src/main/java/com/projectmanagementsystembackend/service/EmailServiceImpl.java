@@ -66,4 +66,28 @@ public class EmailServiceImpl implements EmailService{
 
         javaMailSender.send(message);
     }
+
+    @Override
+    public void sendWelcomeEmail(String email, String fullName) {
+        // Prepare the context for the template
+        Context context = new Context();
+        context.setVariable("userName", fullName);
+
+        String htmlContent = templateEngine.process("welcome", context);
+
+        // Create and send the email
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper;
+        try {
+            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+            mimeMessageHelper.setTo(email);
+            mimeMessageHelper.setSubject("Welcome to Projex");
+            mimeMessageHelper.setText(htmlContent, true); // true = isHtml
+
+            javaMailSender.send(mimeMessageHelper.getMimeMessage());
+            logger.info("Welcome email sent successfully to {}", email);
+        } catch (MailException | MessagingException e) {
+            logger.error("Error sending welcome email: {}", e.getMessage());
+        }
+    }
 }
