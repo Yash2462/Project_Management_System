@@ -61,6 +61,9 @@ public class AuthController {
 
             subscriptionService.createSubscription(savedUser);
 
+            // Send welcome email
+            emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFullName());
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(),user.getPassword());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
