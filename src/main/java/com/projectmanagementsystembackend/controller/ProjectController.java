@@ -56,7 +56,6 @@ public class ProjectController {
         if (project == null){
             responseMessage.setMessage("Not found Data");
             responseMessage.setStatus(404);
-            responseMessage.setData(project);
             return new ResponseEntity<>(responseMessage, HttpStatus.NOT_FOUND);
         }
 
