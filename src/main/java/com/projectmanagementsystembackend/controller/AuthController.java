@@ -88,7 +88,7 @@ public class AuthController {
         try {
             log.info("otp request received for email: {}", email);
             String otp = otpService.generateOtp(email);
-            //emailService.sendOtp(email, otp);
+            emailService.sendOtp(email, otp);
             return new ResponseEntity<>(ResponseMessage.Generic.OTP_SENT, HttpStatus.OK);
         } catch (Exception e) {
             authResponse.setMessage("Failed to send OTP: " + e.getMessage());
