@@ -1,12 +1,15 @@
-version: '3.8'
+version: '3.9'
 
 services:
   db:
     image: mysql:8.0
     container_name: mysql
     environment:
-      MYSQL_DATABASE: projectdb
-      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD_FROM_ENV}
+      RAZORPAY_API_KEY: ${RAZORPAY_API_KEY_FROM_ENV}
+      RAZORPAY_API_SECRET: ${RAZORPAY_API_SECRET_FROM_ENV}
     ports:
       - "3308:3306"
     volumes:
@@ -29,12 +32,12 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/projectdb
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_REDIS_HOST: localhost
-      SPRING_REDIS_PORT: 6379
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_REDIS_HOST: ${SPRING_REDIS_HOST}
+      SPRING_REDIS_PORT: ${SPRING_REDIS_PORT}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
 
 volumes:
   db_data:
