@@ -37,6 +37,8 @@ public class InvitationServiceImpl implements InvitationService{
         if (invitation == null){
             throw new Exception("Invalid invitation token !");
         }
+        invitation.setAccepted(true);
+        invitationRepository.save(invitation);
         return invitation;
     }
 
