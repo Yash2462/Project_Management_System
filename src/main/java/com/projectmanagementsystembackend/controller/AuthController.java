@@ -1,6 +1,7 @@
 package com.projectmanagementsystembackend.controller;
 
 import com.projectmanagementsystembackend.config.JwtProvider;
+import com.projectmanagementsystembackend.dto.SignupRequest;
 import com.projectmanagementsystembackend.model.User;
 import com.projectmanagementsystembackend.ratelimiter.EmailRateLimit;
 import com.projectmanagementsystembackend.ratelimiter.RateLimit;
@@ -45,7 +46,7 @@ public class AuthController {
 
     // signup api
     @PostMapping("/signup")
-    public ResponseEntity<Object> createUserHandler(@RequestBody User user) throws Exception {
+    public ResponseEntity<Object> createUserHandler(@RequestBody SignupRequest user) throws Exception {
         try {
             User isExist = userRepository.findByEmail(user.getEmail());
 
