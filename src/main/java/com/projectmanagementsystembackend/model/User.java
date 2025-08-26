@@ -17,6 +17,7 @@ public class User {
     private Long id;
     private String fullName;
     private String email;
+    @JsonIgnore
     private String password;
     // whenever we create project increase this and remove project then decrease this tracking number of project
     private int projectSize;
