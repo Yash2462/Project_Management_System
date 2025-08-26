@@ -1,6 +1,5 @@
-package com.projectmanagementsystembackend.dto;
+package com.projectmanagementsystembackend.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

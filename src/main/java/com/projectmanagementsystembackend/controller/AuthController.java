@@ -1,7 +1,7 @@
 package com.projectmanagementsystembackend.controller;
 
 import com.projectmanagementsystembackend.config.JwtProvider;
-import com.projectmanagementsystembackend.dto.SignupRequest;
+import com.projectmanagementsystembackend.request.SignupRequest;
 import com.projectmanagementsystembackend.model.User;
 import com.projectmanagementsystembackend.ratelimiter.EmailRateLimit;
 import com.projectmanagementsystembackend.ratelimiter.RateLimit;
@@ -24,8 +24,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 
 @Slf4j
 @RestController
