@@ -50,12 +50,18 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         // generate your JWT
         String jwt = JwtProvider.generateTokenForOauth(email,authentication);
 
-        AuthResponse authResponse = new AuthResponse(jwt, 200, "Login successful");
+        // instead of JSON, return HTML + JS to store token
+        String redirectUrl = "http://localhost:3000/dashboard"; // your React app page after login
 
-        response.setContentType("application/json");
+        String htmlResponse = "<!DOCTYPE html>" +
+                "<html><head><script>" +
+                "localStorage.setItem('token', '" + jwt + "');" +
+                "window.location.href='" + redirectUrl + "';" +
+                "</script></head><body></body></html>";
+
+        response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
-
-        // serialize with Jackson
-        response.getWriter().write(objectMapper.writeValueAsString(authResponse));
+        response.getWriter().write(htmlResponse);
+        response.getWriter().flush();
     }
 }
