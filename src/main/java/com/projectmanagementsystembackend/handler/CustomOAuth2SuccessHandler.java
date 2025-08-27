@@ -8,7 +8,10 @@ import com.projectmanagementsystembackend.vo.AuthResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,13 +21,16 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Random;
 
 @Component
-@AllArgsConstructor
+//@AllArgsConstructor
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
     private UserRepository userRepository;
 
     @Value("${frontend.url:http://localhost:3000/dashboard}")
@@ -54,18 +60,17 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         // generate your JWT
         String jwt = JwtProvider.generateTokenForOauth(email,authentication);
 
-        // instead of JSON, return HTML + JS to store token
-        String redirectUrl = frontEndUrl; // your React app page after login
+        // Create secure, HttpOnly cookie
+        ResponseCookie cookie = ResponseCookie.from("token", jwt)
+                .httpOnly(true)        // not accessible from JS
+                .secure(false)          // only sent over HTTPS (set to false if testing on http://localhost)
+                .sameSite("Strict")    // prevent CSRF, adjust to "Lax" if needed
+                .path("/")             // available to entire app
+                .maxAge(Duration.ofDays(1)) // matches your token expiration
+                .build();
 
-        String htmlResponse = "<!DOCTYPE html>" +
-                "<html><head><script>" +
-                "localStorage.setItem('token', '" + jwt + "');" +
-                "window.location.href='" + redirectUrl + "';" +
-                "</script></head><body></body></html>";
-
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(htmlResponse);
-        response.getWriter().flush();
+        // Add cookie to response
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        response.sendRedirect(frontEndUrl);
     }
 }
