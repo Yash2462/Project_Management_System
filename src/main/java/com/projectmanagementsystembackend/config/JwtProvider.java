@@ -29,6 +29,17 @@ public class JwtProvider {
         return jwt;
     }
 
+    public static String generateTokenForOauth(String email,Authentication authentication){
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        String jwt = Jwts.builder().setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime()+86400000))
+                .claim("email",email)
+                .signWith(key)
+                .compact();
+
+        return jwt;
+    }
+
     public static String getEmailFromToken(String jwt){
          jwt = jwt.substring(7,jwt.length());
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
