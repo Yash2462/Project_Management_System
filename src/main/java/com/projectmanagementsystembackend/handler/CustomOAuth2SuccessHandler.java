@@ -1,0 +1,61 @@
+package com.projectmanagementsystembackend.handler;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.projectmanagementsystembackend.config.JwtProvider;
+import com.projectmanagementsystembackend.model.User;
+import com.projectmanagementsystembackend.repository.UserRepository;
+import com.projectmanagementsystembackend.vo.AuthResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Random;
+
+@Component
+@AllArgsConstructor
+public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
+
+    private final ObjectMapper objectMapper;
+    private UserRepository userRepository;
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2User oauthUser = oauthToken.getPrincipal();
+
+
+        String email = oauthUser.getAttribute("email");
+
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setFullName(oauthUser.getAttribute("name"));
+            Random random = new Random();
+            String generatedPassword = "OauthUser@" + random.nextInt(10000, 99999);
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            newUser.setPassword(passwordEncoder.encode(generatedPassword));
+            userRepository.save(newUser);
+        }
+        // generate your JWT
+        String jwt = JwtProvider.generateTokenForOauth(email,authentication);
+
+        AuthResponse authResponse = new AuthResponse(jwt, 200, "Login successful");
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // serialize with Jackson
+        response.getWriter().write(objectMapper.writeValueAsString(authResponse));
+    }
+}
