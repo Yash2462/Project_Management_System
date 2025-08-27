@@ -8,6 +8,7 @@ import com.projectmanagementsystembackend.vo.AuthResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +26,9 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     private final ObjectMapper objectMapper;
     private UserRepository userRepository;
+
+    @Value("${frontend.url:http://localhost:3000/dashboard}")
+    private String frontEndUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -51,7 +55,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String jwt = JwtProvider.generateTokenForOauth(email,authentication);
 
         // instead of JSON, return HTML + JS to store token
-        String redirectUrl = "http://localhost:3000/dashboard"; // your React app page after login
+        String redirectUrl = frontEndUrl; // your React app page after login
 
         String htmlResponse = "<!DOCTYPE html>" +
                 "<html><head><script>" +
