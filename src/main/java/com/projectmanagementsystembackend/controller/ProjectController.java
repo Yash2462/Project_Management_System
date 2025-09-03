@@ -28,9 +28,8 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<Object> getProjects(@RequestParam(required = false) String category,
-                                                     @RequestParam(required = false) String tag,
-                                                     @RequestHeader("Authorization") String jwt) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+                                                     @RequestParam(required = false) String tag) throws Exception {
+        User user = userService.getCurrentUser();
         List<Project> projects = projectService.getProjectByTeam(user,category,tag);
         ResponseMessage responseMessage = new ResponseMessage();
         if (projects.isEmpty()){
@@ -48,9 +47,7 @@ public class ProjectController {
 
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<Object> getProjectById(@PathVariable(value = "projectId")Long projectId,
-                                              @RequestHeader("Authorization") String jwt) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> getProjectById(@PathVariable(value = "projectId")Long projectId) throws Exception {
         Project project = projectService.getProjectById(projectId);
         ResponseMessage responseMessage = new ResponseMessage();
         if (project == null){
@@ -66,9 +63,8 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createProject(@RequestHeader("Authorization") String jwt,
-                                                 @RequestBody Project project) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> createProject(@RequestBody Project project) throws Exception {
+        User user = userService.getCurrentUser();
         ResponseMessage responseMessage = new ResponseMessage();
         Project project1 = projectService.createProject(project,user);
         if (project1 == null){
@@ -85,9 +81,7 @@ public class ProjectController {
 
     @PutMapping("/{projectId}")
     public ResponseEntity<Object> updateProject(@PathVariable(value = "projectId") Long projectId,
-                                                @RequestHeader("Authorization") String jwt,
                                                 @RequestBody Project project) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
         Project existingProject = projectService.updateProject(project,projectId);
         ResponseMessage responseMessage = new ResponseMessage();
         if (existingProject == null){
@@ -103,10 +97,8 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{projectId}")
-    public ResponseEntity<Object> deleteProject(@PathVariable(value = "projectId") Long projectId,
-                                                @RequestHeader("Authorization") String jwt
-                                                ) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> deleteProject(@PathVariable(value = "projectId") Long projectId) throws Exception {
+        User user = userService.getCurrentUser();
          projectService.deleteProject(projectId,user.getId());
         ResponseMessage responseMessage = new ResponseMessage();
 
@@ -117,9 +109,8 @@ public class ProjectController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchProjects(@RequestParam(required = false) String keyword,
-                                                 @RequestHeader("Authorization") String jwt) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> searchProjects(@RequestParam(required = false) String keyword) throws Exception {
+        User user = userService.getCurrentUser();
         List<Project> projects = projectService.searchProjects(keyword,user);
         ResponseMessage responseMessage = new ResponseMessage();
         if (projects.isEmpty()){
@@ -137,9 +128,8 @@ public class ProjectController {
 
 
     @GetMapping("/{projectId}/chat")
-    public ResponseEntity<Object> getChatByProjectId(@PathVariable(value = "projectId")Long projectId,
-                                                 @RequestHeader("Authorization") String jwt) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> getChatByProjectId(@PathVariable(value = "projectId")Long projectId) throws Exception {
+        User user = userService.getCurrentUser();
         Chat chat = projectService.getChatByProjectId(projectId);
         ResponseMessage responseMessage = new ResponseMessage();
         if (chat == null){
@@ -157,9 +147,7 @@ public class ProjectController {
 
 
     @PostMapping("/invite")
-    public ResponseEntity<Object> inviteProject(@RequestBody InviteRequest inviteRequest,
-                                                @RequestHeader("Authorization") String jwt) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> inviteProject(@RequestBody InviteRequest inviteRequest) throws Exception {
         ResponseMessage responseMessage = new ResponseMessage();
         invitationService.sendInvitation(inviteRequest.getEmail(),inviteRequest.getProjectId());
 
@@ -169,9 +157,8 @@ public class ProjectController {
     }
 
     @GetMapping("/accept_invitation")
-    public ResponseEntity<Object> acceptProjectInvite(@RequestParam String token,
-                                                @RequestHeader("Authorization") String jwt) throws Exception {
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> acceptProjectInvite(@RequestParam String token) throws Exception {
+        User user = userService.getCurrentUser();
         ResponseMessage responseMessage = new ResponseMessage();
         Invitation invitation = invitationService.acceptInvitation(token, user.getId());
         projectService.addUserToProject(invitation.getProjectId(), user.getId());

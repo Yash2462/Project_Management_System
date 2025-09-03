@@ -46,4 +46,10 @@ public class UserServiceImpl implements UserService{
         existingUser.setProjectSize(number);
         return userRepository.save(existingUser);
     }
+
+    @Override
+    public User getCurrentUser() {
+        String email = JwtProvider.getCurrentUser();
+        return userRepository.findByEmail(email);
+    }
 }
