@@ -7,6 +7,7 @@ import com.projectmanagementsystembackend.request.IssueRequest;
 import com.projectmanagementsystembackend.service.IssueService;
 import com.projectmanagementsystembackend.service.UserService;
 import com.projectmanagementsystembackend.vo.ResponseMessage;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +61,8 @@ public class IssueController {
 
 
    @PostMapping
-   public ResponseEntity<Object> createIssue(@RequestBody IssueRequest issueRequest ,
-                                             @RequestHeader("Authorization") String token) throws Exception {
-
-       User tokenUser = userService.findUserProfileByJwt(token);
-       User user = userService.findUserById(tokenUser.getId());
+   public ResponseEntity<Object> createIssue(@Valid @RequestBody IssueRequest issueRequest) throws Exception {
+       User tokenUser = userService.getCurrentUser();
        Issue issue = issueService.createIssue(issueRequest, tokenUser.getId());
        ResponseMessage responseMessage = new ResponseMessage();
        if (issue != null) {
@@ -92,9 +90,8 @@ public class IssueController {
    }
 
    @DeleteMapping("/{issueId}")
-   public ResponseEntity<Object> deleteIssue(@PathVariable(value ="issueId") Long issueId,
-                                             @RequestHeader("Authorization") String token) throws Exception {
-       User tokenUser = userService.findUserProfileByJwt(token);
+   public ResponseEntity<Object> deleteIssue(@PathVariable(value ="issueId") Long issueId) throws Exception {
+       User tokenUser = userService.getCurrentUser();
        issueService.deleteIssue(issueId, tokenUser.getId());
 
        ResponseMessage responseMessage = new ResponseMessage();

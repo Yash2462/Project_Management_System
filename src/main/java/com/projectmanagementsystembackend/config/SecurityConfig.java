@@ -42,8 +42,10 @@ public class SecurityConfig {
             http.headers(AbstractHttpConfigurer::disable);
         }
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(request -> request.requestMatchers("/api/**").authenticated()
+                .authorizeHttpRequests(request -> request
                         .requestMatchers("/h2-console/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/api/projects/accept_invitation", "/projects/accept_invitation").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtTokenValidator(), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(httpSecurityOAuth2LoginConfigurer ->  httpSecurityOAuth2LoginConfigurer.successHandler(customOAuth2SuccessHandler))

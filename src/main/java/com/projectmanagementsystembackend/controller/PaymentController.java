@@ -42,10 +42,9 @@ public class PaymentController {
     }
 
     @PostMapping("/{planType}")
-    public ResponseEntity<PaymentLinkResponse> createPaymentLink(@PathVariable(value = "planType") PlanType planType,
-                                                                 @RequestHeader("Authorization") String token) throws Exception {
+    public ResponseEntity<PaymentLinkResponse> createPaymentLink(@PathVariable(value = "planType") PlanType planType) throws Exception {
 
-        User user = userService.findUserProfileByJwt(token);
+        User user = userService.getCurrentUser();
         int amount = amount_Paise;
 
         if (planType.equals(PlanType.ANNUALLY)){

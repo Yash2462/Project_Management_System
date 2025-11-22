@@ -6,7 +6,14 @@ import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
+/**
+ * Redis configuration for distributed locking via Redisson.
+ * Caching has been removed to avoid Hibernate lazy initialization issues.
+ */
 @Configuration
 public class RedisConfiguration {
 
@@ -19,7 +26,15 @@ public class RedisConfiguration {
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://"+redisHost+":"+redisPort);
+        config.useSingleServer().setAddress("redis://" + redisHost + ":" + redisPort);
         return Redisson.create(config);
+    }
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
+        redisConfig.setHostName(redisHost);
+        redisConfig.setPort(Integer.parseInt(redisPort));
+        return new LettuceConnectionFactory(redisConfig);
     }
 }

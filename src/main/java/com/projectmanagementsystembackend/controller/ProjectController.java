@@ -149,24 +149,37 @@ public class ProjectController {
     @PostMapping("/invite")
     public ResponseEntity<Object> inviteProject(@RequestBody InviteRequest inviteRequest) throws Exception {
         ResponseMessage responseMessage = new ResponseMessage();
-        invitationService.sendInvitation(inviteRequest.getEmail(),inviteRequest.getProjectId());
+
+        if (inviteRequest.getEmail() == null || inviteRequest.getProjectId() == null) {
+            responseMessage.setMessage("Email and ProjectId are required");
+            responseMessage.setStatus(400);
+            return new ResponseEntity<>(responseMessage, HttpStatus.BAD_REQUEST);
+        }
+
+        invitationService.sendInvitation(inviteRequest.getEmail(), inviteRequest.getProjectId());
 
         responseMessage.setMessage("User Invitation sent successfully");
         responseMessage.setStatus(200);
-        return new ResponseEntity<>(responseMessage,HttpStatus.OK);
+        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
     }
 
     @GetMapping("/accept_invitation")
     public ResponseEntity<Object> acceptProjectInvite(@RequestParam String token) throws Exception {
-        User user = userService.getCurrentUser();
         ResponseMessage responseMessage = new ResponseMessage();
-        Invitation invitation = invitationService.acceptInvitation(token, user.getId());
+
+        // Accept invitation using the token - token contains user email info
+        Invitation invitation = invitationService.acceptInvitation(token);
+
+        // Get user by email from invitation
+        User user = userService.findUserByEmail(invitation.getEmail());
+
+        // Add user to project
         projectService.addUserToProject(invitation.getProjectId(), user.getId());
 
-        responseMessage.setMessage("User Invitation accepted successfully");
+        responseMessage.setMessage("Invitation accepted successfully. You have been added to the project.");
         responseMessage.setStatus(200);
         responseMessage.setData(invitation);
-        return new ResponseEntity<>(responseMessage,HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
     }
 
 

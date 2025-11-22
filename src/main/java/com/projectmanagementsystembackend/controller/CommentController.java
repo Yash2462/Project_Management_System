@@ -6,6 +6,7 @@ import com.projectmanagementsystembackend.request.CommentRequest;
 import com.projectmanagementsystembackend.service.CommentService;
 import com.projectmanagementsystembackend.service.UserService;
 import com.projectmanagementsystembackend.vo.ResponseMessage;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,8 @@ public class CommentController {
     private UserService userService;
 
     @PostMapping
-    public ResponseEntity<Object> createComment(@RequestBody CommentRequest request,
-                                                @RequestHeader("Authorization") String token
-                                                ) throws Exception {
-        User user = userService.findUserProfileByJwt(token);
+    public ResponseEntity<Object> createComment(@Valid @RequestBody CommentRequest request) throws Exception {
+        User user = userService.getCurrentUser();
        Comments comments = commentService.createComment(request.getIssueId(), user.getId(),request.getContent());
         ResponseMessage responseMessage = new ResponseMessage();
        if (comments == null){
@@ -43,10 +42,9 @@ public class CommentController {
 
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Object> deleteComment(@PathVariable Long commentId ,
-                                                @RequestHeader("Authorization") String token) throws Exception {
+    public ResponseEntity<Object> deleteComment(@PathVariable Long commentId) throws Exception {
 
-        User user = userService.findUserProfileByJwt(token);
+        User user = userService.getCurrentUser();
         ResponseMessage responseMessage = new ResponseMessage();
         try {
             commentService.deleteComment(commentId, user.getId());

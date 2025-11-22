@@ -20,9 +20,8 @@ public class SubscriptionController {
     private UserService userService;
 
     @GetMapping("/user")
-    public ResponseEntity<Object> getUserSubscription(@RequestHeader("Authorization") String token) throws Exception {
-
-        User user = userService.findUserProfileByJwt(token);
+    public ResponseEntity<Object> getUserSubscription() throws Exception {
+        User user = userService.getCurrentUser();
         Subscription subscription = subscriptionService.getUserSubscription(user.getId());
         ResponseMessage responseMessage = new ResponseMessage();
         if (subscription == null){
@@ -41,10 +40,9 @@ public class SubscriptionController {
 
 
     @PutMapping("/upgrade")
-    public ResponseEntity<Object> upgradeSubscription(@RequestHeader("Authorization") String token,
-                                                      @RequestParam PlanType planType) throws Exception {
+    public ResponseEntity<Object> upgradeSubscription(@RequestParam PlanType planType) throws Exception {
 
-        User user = userService.findUserProfileByJwt(token);
+        User user = userService.getCurrentUser();
         Subscription subscription = subscriptionService.updateSubscription(user.getId(), planType);
         ResponseMessage responseMessage = new ResponseMessage();
         if (subscription == null){
