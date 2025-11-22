@@ -32,7 +32,7 @@ public class InvitationServiceImpl implements InvitationService{
     }
 
     @Override
-    public Invitation acceptInvitation(String token, Long userId) throws Exception {
+    public Invitation acceptInvitation(String token) throws Exception {
         Invitation invitation = invitationRepository.findByToken(token);
         if (invitation == null){
             throw new Exception("Invalid invitation token !");

@@ -1,5 +1,6 @@
 package com.projectmanagementsystembackend.service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -21,8 +22,15 @@ public class EmailServiceImpl implements EmailService{
     private JavaMailSender javaMailSender;
     @Value("${spring.mail.username}")
     private String sender;
+    @Value("${spring.mail.password}")
+    private String mailPassword;
     @Autowired
     private TemplateEngine templateEngine;
+
+    @PostConstruct
+    public void printHello(){
+        logger.info("Email Password: {}", mailPassword);
+    }
     @Override
     public void sendEmailWithToken(String userEmail, String link) throws Exception {
         // Prepare the context for the template

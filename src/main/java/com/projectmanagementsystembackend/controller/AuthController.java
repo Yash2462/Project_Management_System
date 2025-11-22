@@ -13,6 +13,8 @@ import com.projectmanagementsystembackend.service.OtpService;
 import com.projectmanagementsystembackend.service.SubscriptionService;
 import com.projectmanagementsystembackend.vo.AuthResponse;
 import com.projectmanagementsystembackend.vo.ResponseMessage;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,11 +25,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
 @RequestMapping("/auth")
+@Validated
 public class AuthController {
     @Autowired
     private UserRepository userRepository;
@@ -44,7 +48,7 @@ public class AuthController {
 
     // signup api
     @PostMapping("/signup")
-    public ResponseEntity<Object> createUserHandler(@RequestBody SignupRequest user) throws Exception {
+    public ResponseEntity<Object> createUserHandler(@Valid @RequestBody SignupRequest user) throws Exception {
         try {
             User isExist = userRepository.findByEmail(user.getEmail());
 
@@ -82,7 +86,7 @@ public class AuthController {
     @RateLimit(permits = 5,durationSeconds = 60)
     @EmailRateLimit(permits = 5, durationSeconds = 60)
     @PostMapping("/send-otp")
-    public ResponseEntity<Object> sendOtp(@RequestParam(value = "email") String email) {
+    public ResponseEntity<Object> sendOtp(@RequestParam(value = "email") @Email(message = "Email should be valid") String email) {
         AuthResponse authResponse = new AuthResponse();
         try {
             log.info("otp request received for email: {}", email);

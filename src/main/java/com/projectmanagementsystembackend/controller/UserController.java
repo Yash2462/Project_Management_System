@@ -23,8 +23,8 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping("/profile")
-    public ResponseEntity<Object> getUserProfile(@RequestHeader("Authorization") String jwt) throws Exception{
-        User user = userService.findUserProfileByJwt(jwt);
+    public ResponseEntity<Object> getUserProfile() throws Exception{
+        User user = userService.getCurrentUser();
         ResponseMessage responseMessage = new ResponseMessage();
 
         if (user == null){
